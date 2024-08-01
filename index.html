@@ -6,31 +6,100 @@
     <title>Food Image Classifier</title>
     <style>
         body {
-            background-color: pink;
+            background-color: #f8bbd0; /* Light pink background */
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 50px;
+            color: #333; /* Dark text color for readability */
         }
         .container {
             display: inline-block;
-            background-color: #f5f5dc;
+            background-color: #000; /* Black background for the container */
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            color: #fff; /* White text color for contrast */
         }
-        a {
-            text-decoration: none;
-            color: #007bff;
+        #result {
+            margin-top: 20px;
+            background-color: #000; /* Black background for result container */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            color: #fff; /* White text color for result container */
+        }
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 20px;
+            border: 2px solid #fff; /* White border for file input */
+            background-color: #000; /* Black background for file input */
+            color: #fff; /* White text color for file input */
+        }
+        button {
+            background-color: #f06292; /* Pink button color */
+            color: #fff; /* White text color for button */
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #ec407a; /* Darker pink on hover */
         }
     </style>
 </head>
 <body>
     <h1>Food Image Classifier</h1>
     <div class="container">
-        <p>Check out our Food Image Classifier on Hugging Face Spaces:</p>
-        <a href="https://huggingface.co/spaces/Sakibrumu/Food_Image_Classification" target="_blank">
-            Go to Food Image Classifier
-        </a>
+        <input type="file" id="imageInput" accept="image/*">
+        <button onclick="predictImage()">Predict</button>
     </div>
+    <div id="result" class="container" style="display: none;">
+        <h2>Prediction Result:</h2>
+        <p id="label"></p>
+    </div>
+
+    <script>
+        async function predictImage() {
+            const fileInput = document.getElementById('imageInput');
+            const resultDiv = document.getElementById('result');
+            const labelP = document.getElementById('label');
+            resultDiv.style.display = 'none';
+
+            if (fileInput.files.length === 0) {
+                alert('Please select an image file.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('img', file);
+
+            try {
+                const response = await fetch('https://huggingface.co/spaces/Sakibrumu/Food_Image_Classification/api/predict/', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                console.log(result);
+
+                if (result.label) {
+                    const label = result.label;
+                    labelP.innerText = `Label: ${label}`;
+                } else {
+                    labelP.innerText = 'Prediction failed. Please try again with another image.';
+                }
+
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while predicting the image. Please try again later.');
+            }
+        }
+    </script>
 </body>
 </html>
