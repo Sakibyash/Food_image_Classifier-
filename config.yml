@@ -1,0 +1,38 @@
+# This is a sample configuration file for your Hugging Face Space.
+
+# Required settings for the space
+sdk: gradio  # Specify the type of SDK you are using, e.g., 'gradio'
+
+# Space metadata
+title: Food Image Classifier  # Title of your Space
+emoji: 🍔  # Emoji to represent your project
+colorFrom: pink  # Color for the header
+colorTo: pink  # Color for the footer
+app_file: app.py  # The main file to run for your Gradio app
+
+# Optional settings
+description: |
+  This space allows you to classify images of food. 
+  Upload an image, and the model will predict the type of food along with the confidence level.
+
+tags:
+  - food
+  - image-classification
+  - machine-learning
+  - deep-learning
+
+# Dependencies
+python_version: 3.8  # Specify the Python version to use
+requirements:
+  - fastai==2.7.11  # Include any Python package dependencies here
+  - gradio==3.1.4  # Ensure Gradio is included
+  - torch==1.12.1  # Specify PyTorch version
+  - torchvision==0.13.1  # Specify Torchvision version
+
+# Files to include in the space
+include:
+  - model/food_model_v1.pkl  # Include the model file
+  - examples/food1.jpg  # Include example images if needed
+
+# Hardware requirements (optional)
+gpu: true  # Specify if you need a GPU for your Space
