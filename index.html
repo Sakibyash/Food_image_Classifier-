@@ -1,22 +1,61 @@
-from gradio_client import Client, handle_file
-import requests
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Image Classifier</title>
+</head>
+<body>
+    <h1>Food Image Classifier</h1>
 
-# Initialize the client with the Hugging Face Space URL or ID
-client = Client("Sakibrumu/Food_Image_Classification")
+    <!-- Image Upload -->
+    <input type="file" id="imageUpload" accept="image/*">
+    <button onclick="submitImage()">Submit</button>
 
-# URL of the image to be used for prediction
-url = 'https://raw.githubusercontent.com/gradio-app/gradio/main/test/test_files/bus.png'
+    <!-- Display Results -->
+    <div id="results"></div>
 
-# Download the image from the URL and save it locally
-response = requests.get(url)
-with open("image.png", "wb") as f:
-    f.write(response.content)
+    <script>
+        async function submitImage() {
+            const fileInput = document.getElementById('imageUpload');
+            const file = fileInput.files[0];
 
-# Handle the downloaded file for prediction
-result = client.predict(
-    img=handle_file("image.png"),  # Use the local file path for prediction
-    api_name="/predict_image"  # Ensure this matches the API name defined in your Gradio app
-)
+            if (!file) {
+                alert('Please upload an image.');
+                return;
+            }
 
-# Print the result from the prediction
-print(result)
+            // Convert image to base64
+            const reader = new FileReader();
+            reader.onload = async function () {
+                const base64Image = reader.result.split(',')[1]; // Get the base64 string
+
+                // Call Hugging Face API
+                const response = await fetch("https://sakibrumu-food-image-classification.hf.space/run/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ data: [base64Image] })
+                });
+
+                // Handle the API response
+                if (response.ok) {
+                    const result = await response.json();
+                    const label = result.data[0].label; // Adjust if necessary based on response structure
+
+                    // Display the uploaded image and prediction result
+                    document.getElementById('results').innerHTML = `
+                        <h3>Prediction: ${label}</h3>
+                        <img src="${reader.result}" width="300">
+                    `;
+                } else {
+                    alert('Error: ' + response.statusText);
+                }
+            };
+            
+            reader.readAsDataURL(file); // Convert the file to base64
+        }
+    </script>
+</body>
+</html>
