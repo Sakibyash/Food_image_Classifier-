@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Image Classifier</title>
+</head>
+<body>
+    <h1>Food Image Classifier</h1>
+
+    <!-- Image Upload -->
+    <input type="file" id="imageUpload" accept="image/*">
+    <button onclick="submitImage()">Submit</button>
+
+    <!-- Display Results -->
+    <div id="results"></div>
+
+    <script>
+        async function submitImage() {
+            const fileInput = document.getElementById('imageUpload');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please upload an image.');
+                return;
+            }
+
+            // Convert image to base64
+            const reader = new FileReader();
+            reader.onload = async function () {
+                const base64Image = reader.result.split(',')[1]; // Get the base64 string
+
+                // Call Hugging Face API
+                const response = await fetch("https://sakibrumu-food-image-classification.hf.space/run/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ data: [base64Image] })
+                });
+
+                // Handle the API response
+                if (response.ok) {
+                    const result = await response.json();
+                    const label = result.data[0].label; // Adjust if necessary based on response structure
+
+                    // Display the uploaded image and prediction result
+                    document.getElementById('results').innerHTML = `
+                        <h3>Prediction: ${label}</h3>
+                        <img src="${reader.result}" width="300">
+                    `;
+                } else {
+                    alert('Error: ' + response.statusText);
+                }
+            };
+            
+            reader.readAsDataURL(file); // Convert the file to base64
+        }
+    </script>
+</body>
+</html>
